@@ -1,21 +1,27 @@
 <?php
 
+use Illuminate\Http\Request;
+use MyBlog\Presenters\DateFormatPresenterFactory;
 use MyBlog\Repositories\UserRepository;
 
 class UserController extends \BaseController
 {
     /** @var UserRepository */
-    private $userRepository;
+    protected $userRepository;
+    /** @var DateFormatPresenterFactory */
+    protected $dateFormatPresenterFactory;
 
     /**
      * UserController constructor.
      * @param UserRepository $userRepository
+     * @param DateFormatPresenterFactory $dateFormatPresenterFactory
      */
-    public function __construct(UserRepository $userRepository)
+    public function __construct(UserRepository $userRepository,
+        DateFormatPresenterFactory $dateFormatPresenterFactory)
     {
         $this->userRepository = $userRepository;
+        $this->dateFormatPresenterFactory = $dateFormatPresenterFactory;
     }
-
 
     /**
      * Display a listing of the resource.
@@ -26,6 +32,10 @@ class UserController extends \BaseController
     {
         $users = $this->userRepository->getAgeLargerThan(10);
 
-        return View::make('users.index', compact('users'));
+        $locale = (Input::get('lang')) ? Input::get('lang') : 'us';
+
+        $dateFormatPresenter = $this->dateFormatPresenterFactory->create($locale);
+
+        return View::make('users.index', compact('users', 'dateFormatPresenter'));
     }
 }
